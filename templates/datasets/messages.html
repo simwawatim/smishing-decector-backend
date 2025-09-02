@@ -1,0 +1,94 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block extra_head %}
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10">
+
+    <!-- Messages Table -->
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Recent Messages</h2>
+        <table id="messagesTable" class="display stripe hover w-full">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Label</th>
+                    <th>Message</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sms in recent_messages %}
+                <tr>
+                    <td>{{ sms.id }}</td>
+                    <td>{{ sms.label }}</td>
+                    <td>
+                        <span class="message-preview">{{ sms.message|truncatechars:50 }}</span>
+                        {% if sms.message|length > 50 %}
+                        <button class="text-blue-500 ml-2 view-more-btn">View More</button>
+                        <span class="hidden full-message">{{ sms.message }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if sms.label == 'scam' %}
+                        <span class="px-2 py-1 rounded text-white bg-red-500 font-semibold">Scam</span>
+                        {% else %}
+                        <span class="px-2 py-1 rounded text-white bg-green-500 font-semibold">Ham</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ sms.created_at|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- jQuery and DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#messagesTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+        pageLength: 10,
+        order: [[0, 'desc']]
+    });
+
+
+    $(document).on('click', '.view-more-btn', function() {
+        var $btn = $(this);
+        var $cell = $btn.closest('td');
+        var $preview = $cell.find('.message-preview');
+        var $full = $cell.find('.full-message');
+
+        if ($full.hasClass('hidden')) {
+            $preview.text($full.text());
+            $full.removeClass('hidden');
+            $btn.text('Show Less');
+        } else {
+            $preview.text($full.text().substring(0, 50) + '...');
+            $full.addClass('hidden');
+            $btn.text('View More');
+        }
+    });
+});
+</script>
+{% endblock %}

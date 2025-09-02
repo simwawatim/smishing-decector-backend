@@ -1,0 +1,39 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Add SMS Message{% endblock %}
+
+{% block content %}
+<div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md mx-auto">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Add SMS Message</h2>
+
+    {% if messages %}
+    <ul class="mb-4">
+        {% for message in messages %}
+        <li class="mb-2 p-2 rounded {{ message.tags }} bg-gray-100 text-gray-800">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post" class="space-y-5" action="{% url 'datasets:create_datasets' %}">
+        {% csrf_token %}
+        <div>
+            <label for="id_label" class="block text-gray-700 font-medium mb-2">Label</label>
+            <select name="label" id="id_label" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="scam">Scam</option>
+                <option value="ham">Ham</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="id_message" class="block text-gray-700 font-medium mb-2">Message</label>
+            <textarea name="message" id="id_message" rows="5" placeholder="Enter the SMS message here..." class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+        </div>
+
+        <div>
+            <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300">
+                Add Message
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

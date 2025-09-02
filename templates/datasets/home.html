@@ -1,0 +1,36 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10">
+    <!-- Welcome Card -->
+    <div class="bg-white shadow-md rounded-lg p-8 mb-8 text-center">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Welcome to SMS Detection App</h1>
+        <p class="text-gray-600 mb-6">
+            Manage and analyze your SMS dataset for scam detection. Add new messages, review existing ones, and track your data.
+        </p>
+        <a href="{% url 'datasets:update_data_sets' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-md transition-colors duration-300">
+            Add New SMS
+        </a>
+    </div>
+
+    <!-- Quick Stats Section -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="bg-white shadow-md rounded-lg p-6 text-center">
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Total Messages</h2>
+            <p class="text-gray-600 text-3xl">{{ total_messages }}</p>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg p-6 text-center">
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Scam Messages</h2>
+            <p class="text-gray-600 text-3xl">{{ scam_messages }}</p>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg p-6 text-center">
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Ham Messages</h2>
+            <p class="text-gray-600 text-3xl">{{ ham_messages }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

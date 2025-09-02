@@ -1,0 +1,88 @@
+{% extends 'base/base.html' %}
+
+{% block title %}SMS API Tester{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-10 p-4">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">SMS Spam Detector API Tester</h2>
+
+    <!-- API request card -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+            <!-- URL input -->
+            <input type="text" id="api-url" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value="http://127.0.0.1:8000/action/english-predidctions/" readonly>
+
+            <!-- Language selector -->
+            <select id="api-method" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="english">ENGLISH</option>
+                <option value="bemba">BEMBA</option>
+            </select>
+
+            <!-- Send button -->
+            <button id="send-request" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg px-6 py-2 w-full md:w-auto">Send</button>
+        </div>
+
+        <!-- Message input -->
+        <textarea id="api-body" class="mt-4 w-full border border-gray-300 rounded-lg px-3 py-2 h-40 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder='Type your SMS message here...'></textarea>
+        <p class="text-sm text-gray-500 mt-1">
+            Just type your SMS message. The tester will wrap it in JSON automatically.
+        </p>
+    </div>
+
+    <!-- Response display -->
+    <div class="bg-gray-100 shadow-md rounded-lg p-4">
+        <h5 class="font-semibold mb-2 text-gray-700">Response</h5>
+        <pre id="api-response" class="whitespace-pre-wrap break-words text-gray-800 bg-gray-50 p-4 rounded-lg border border-gray-300"></pre>
+        <p id="loading-text" class="text-blue-500 font-semibold mt-2 hidden">Loading...</p>
+    </div>
+</div>
+<script>
+document.getElementById('send-request').addEventListener('click', async () => {
+    const url = document.getElementById('api-url').value;
+    const method = document.getElementById('api-method').value;
+    const message = document.getElementById('api-body').value.trim();
+    const loadingText = document.getElementById('loading-text');
+    const responsePre = document.getElementById('api-response');
+
+    // Clear previous response
+    responsePre.textContent = '';
+
+    if (!message) {
+        alert('Please type your message.');
+        return;
+    }
+
+    const body = { message: message };
+
+    const options = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    };
+
+    try {
+        // Show loading
+        loadingText.classList.remove('hidden');
+
+        // Fetch API response
+        const resPromise = fetch(url + '?lang=' + method, options);
+
+        // Optional: delay for at least 1 second
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const res = await resPromise;
+        const data = await res.json();
+
+        responsePre.textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+        responsePre.textContent = 'Error: ' + err;
+    } finally {
+        // Hide loading
+        loadingText.classList.add('hidden');
+    }
+});
+</script>
+
+{% endblock %}
