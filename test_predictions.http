@@ -1,0 +1,13 @@
+### Test Bemba SMS Prediction
+POST http://127.0.0.1:8000/action/predict-bemba/
+Content-Type: application/x-www-form-urlencoded
+
+message=Ukwete prize! Shita apa link iyi ukufika.
+
+### Test English SMS Prediction
+POST http://127.0.0.1:8000/action/english-predidctions/
+Content-Type: application/json
+
+{
+  "message": "Congratulations! You have won a free prize. Click here to claim."
+}

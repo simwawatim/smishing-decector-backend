@@ -1,9 +1,10 @@
 import os
 import string
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from datasets.models import SMSMessage
+from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 import nltk
 from nltk.tokenize import TreebankWordTokenizer
@@ -61,7 +62,6 @@ def messages_list(request):
 # ------------------- NLTK PREPROCESSING -------------------
 
 def setup_nltk():
-    # Download stopwords if not already present
     try:
         nltk.data.find("corpora/stopwords")
     except LookupError:
@@ -124,3 +124,96 @@ def predict_message(user_input, spam_words, ham_words):
 # Preprocess dataset once when server starts
 cleaned_data = remove_punctuation_and_stopwords()
 spam_words, ham_words = categorize_word(cleaned_data)
+
+# ------------------- IMPORTS -------------------
+import re
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import SMSMessage
+
+# ------------------- PREPROCESSING -------------------
+def preprocess_bemba_datasets():
+    """
+    Load Bemba messages from the SMSMessage model and clean the text.
+    Returns a list of dictionaries with 'label' and 'message_cleaned'.
+    """
+    messages = SMSMessage.objects.all().values("label", "message")  # Fetch all messages
+    cleaned_data = []
+
+    for msg in messages:
+        text = str(msg["message"]).lower()
+        text = re.sub(r"[^\w\s]", "", text)  # remove punctuation
+        text = text.strip()
+        cleaned_data.append({
+            "label": msg["label"].lower(),
+            "message_cleaned": text
+        })
+
+    return cleaned_data
+
+# ------------------- WORD CATEGORIZATION -------------------
+def categorize_bemba_words(cleaned_data):
+    """
+    Create lists of scam and ham words from dataset.
+    """
+    scam_words = set()
+    ham_words = set()
+    
+    for row in cleaned_data:
+        words = row["message_cleaned"].split()
+        if row["label"] == "scam":
+            scam_words.update(words)
+        else:  # 'ham'
+            ham_words.update(words)
+    
+    return list(scam_words), list(ham_words)
+
+# ------------------- PREDICTION -------------------
+def predict_bemba_message(message, scam_words, ham_words):
+    """
+    Predicts whether a Bemba message is scam or ham.
+    Returns prediction and accuracy.
+    """
+    message_clean = message.lower()
+    message_clean = re.sub(r"[^\w\s]", "", message_clean)
+    words = message_clean.split()
+    
+    if not words:
+        return {"prediction": "unknown", "accuracy": 0.0}
+    
+    scam_hits = [w for w in words if w in scam_words]
+    ham_hits = [w for w in words if w in ham_words]
+    
+    if len(scam_hits) > len(ham_hits):
+        prediction = "scam"
+        accuracy = len(scam_hits) / len(words)
+    elif len(ham_hits) > len(scam_hits):
+        prediction = "ham"
+        accuracy = len(ham_hits) / len(words)
+    else:
+        prediction = "unknown"
+        accuracy = 0.0
+    
+    return {"prediction": prediction, "accuracy": round(accuracy, 2)}
+
+# ------------------- PRELOAD BEMBA DATA -------------------
+# Load once when server starts
+bemba_cleaned_data = preprocess_bemba_datasets()
+bemba_scam_words, bemba_ham_words = categorize_bemba_words(bemba_cleaned_data)
+
+# ------------------- API ENDPOINT -------------------
+@csrf_exempt
+def predict_bemba_api(request):
+    if request.method == "POST":
+        user_input = request.POST.get("message", "")
+        if not user_input:
+            return JsonResponse({"error": "Message is required"}, status=400)
+        
+        result = predict_bemba_message(
+            user_input,
+            bemba_scam_words,
+            bemba_ham_words
+        )
+        return JsonResponse(result)
+    
+    return JsonResponse({"error": "Only POST allowed"}, status=405)

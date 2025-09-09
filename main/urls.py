@@ -1,3 +1,4 @@
+from datasets.views import predict_bemba_api
 from detector.urls import path
 from .views import (
     prediction_page,
@@ -8,4 +9,5 @@ app_name = 'action'
 urlpatterns = [
     path('',  prediction_page, name='prediction_page'),
     path('english-predidctions/', english_predictions, name='english_predidctions'),
+    path("predict-bemba/", predict_bemba_api, name="predict_bemba_api"),
 ]
