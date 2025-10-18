@@ -1,3 +1,4 @@
+import json
 import os
 import string
 from django.http import HttpResponse, JsonResponse
@@ -204,16 +205,18 @@ bemba_scam_words, bemba_ham_words = categorize_bemba_words(bemba_cleaned_data)
 # ------------------- API ENDPOINT -------------------
 @csrf_exempt
 def predict_bemba_api(request):
-    if request.method == "POST":
-        user_input = request.POST.get("message", "")
-        if not user_input:
-            return JsonResponse({"error": "Message is required"}, status=400)
-        
-        result = predict_bemba_message(
-            user_input,
-            bemba_scam_words,
-            bemba_ham_words
-        )
-        return JsonResponse(result)
+    if request.method != "POST":
+        return JsonResponse({"status": "Failed", "message": "Only POST requests allowed"}, status=400)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"status": "Failed", "message": "Invalid JSON"}, status=400)
     
-    return JsonResponse({"error": "Only POST allowed"}, status=405)
+    message = data.get("message")
+    result = predict_bemba_message(
+        message,
+        bemba_scam_words,
+        bemba_ham_words
+    )
+    return JsonResponse(result)
+
