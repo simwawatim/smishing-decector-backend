@@ -1,5 +1,5 @@
 ### Test Bemba SMS Prediction
-POST http://127.0.0.1:8000/action/predict-bemba/
+POST http://127.0.0.1:8000/action/api/action/v1/predict-bemba/
 Content-Type: application/json
 
 {
@@ -8,9 +8,38 @@ Content-Type: application/json
 
 
 ### Test English SMS Prediction
-POST http://127.0.0.1:8000/action/english-predidctions/
+POST http://127.0.0.1:8000/action/api/action/v1/english-predidctions/
 Content-Type: application/json
 
 {
   "message": "Congratulations! You have won a free prize. Click here to claim."
 }
+
+
+### create bemba sms dataset
+POST http://127.0.0.1:8000/action/api/action/v1/sms/create/
+Content-Type: application/json
+
+{
+  "label": "scam",
+  "message": "You have won a free car!"
+}
+
+
+### read all sms datasets 
+GET http://127.0.0.1:8000/action/api/action/v1/sms/
+
+
+### read one sms datasets 
+GET http://127.0.0.1:8000/action/api/action/v1/sms/35/
+
+### update sms datasets 
+PUT http://127.0.0.1:8000/action/api/action/v1/sms/update/35/
+Content-Type: application/json
+
+{
+  "message": "Updated message for testing."
+}
+
+### Delete all sms datasets 
+DELETE http://127.0.0.1:8000/action/api/action/v1/sms/delete/35/
