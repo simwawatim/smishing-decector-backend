@@ -73,8 +73,8 @@ document.getElementById('send-request').addEventListener('click', async () => {
     // ✅ Choose correct endpoint
     const url =
         method === 'bemba'
-            ? 'http://127.0.0.1:8000/action/predict-bemba/'
-            : 'http://127.0.0.1:8000/action/english-predidctions/';
+            ? 'http://127.0.0.1:8000/action/api/action/v1/predict-bemba/'
+            : 'http://127.0.0.1:8000/action/api/action/v1/english-predidctions/';
 
     const body = { message: message };
     const options = {
